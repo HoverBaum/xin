@@ -1,0 +1,21 @@
+{
+  "name": "xin",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Hendrik Wallbaum <mail@hendrikwallbaum.de>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "^2.2.0"
+  }
+}
