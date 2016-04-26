@@ -1,10 +1,10 @@
 ## Functions
 
 <dl>
-<dt><a href="#subscribe">subscribe(channel, callback)</a> ⇒ <code><a href="#OnSubscriber">OnSubscriber</a></code></dt>
+<dt><a href="#subscribe">subscribe(channel, [callback])</a> ⇒ <code><a href="#OnSubscriber">OnSubscriber</a></code></dt>
 <dd><p>Subscribe to a channel.</p>
 </dd>
-<dt><a href="#emit">emit(channel, [event])</a></dt>
+<dt><a href="#emit">emit(channel, [event], ...extras)</a></dt>
 <dd><p>Emit something over a channel.</p>
 </dd>
 </dl>
@@ -18,7 +18,7 @@
 
 <a name="subscribe"></a>
 
-## subscribe(channel, callback) ⇒ <code>[OnSubscriber](#OnSubscriber)</code>
+## subscribe(channel, [callback]) ⇒ <code>[OnSubscriber](#OnSubscriber)</code>
 Subscribe to a channel.
 
 **Kind**: global function  
@@ -27,19 +27,20 @@ Subscribe to a channel.
 | Param | Type | Description |
 | --- | --- | --- |
 | channel | <code>string</code> | Channel identifier |
-| callback | <code>function</code> | Function call upon event. |
+| [callback] | <code>function</code> | Function call upon event. |
 
 <a name="emit"></a>
 
-## emit(channel, [event])
+## emit(channel, [event], ...extras)
 Emit something over a channel.
 
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| channel | <code>string</code> | Channel identifier |
-| [event] | <code>string</code> | Event identifier |
+| channel | <code>string</code> | Channel identifier. |
+| [event] | <code>string</code> | Event identifier. |
+| ...extras | <code>any</code> | Any extra parammeters to emit. |
 
 <a name="OnSubscriber"></a>
 
