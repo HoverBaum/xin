@@ -2,7 +2,7 @@
   "name": "xin",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "lib/xin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "jsdoc": "./node_modules/.bin/jsdoc --configure .jsdoc.json --verbose",

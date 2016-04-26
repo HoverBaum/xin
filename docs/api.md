@@ -1,3 +1,11 @@
+## Members
+
+<dl>
+<dt><a href="#XIN">XIN</a> : <code>Object</code></dt>
+<dd><p>XIN</p>
+</dd>
+</dl>
+
 ## Functions
 
 <dl>
@@ -16,6 +24,12 @@
 <dd></dd>
 </dl>
 
+<a name="XIN"></a>
+
+## XIN : <code>Object</code>
+XIN
+
+**Kind**: global variable  
 <a name="subscribe"></a>
 
 ## subscribe(channel, [callback]) ⇒ <code>[OnSubscriber](#OnSubscriber)</code>
@@ -51,4 +65,5 @@ Emit something over a channel.
 | Name | Type | Description |
 | --- | --- | --- |
 | on | <code>function</code> | Subscribe to a special event on this channel. |
+| consume | <code>function</code> | Subscribe to only the next occurance of an event. |
 

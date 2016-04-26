@@ -23,7 +23,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-modules.html">modules</a></li></ul><h3>Events</h3><ul><li><a href="module-modules.html#~event:xin-module-loaded">xin-module-loaded</a></li></ul><h3>Global</h3><ul><li><a href="global.html#emit">emit</a></li><li><a href="global.html#subscribe">subscribe</a></li><li><a href="global.html#XIN">XIN</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-modules.html">modules</a></li></ul><h3>Events</h3><ul><li><a href="module-modules.html#~event:xin-module-loaded">xin-module-loaded</a></li></ul><h3>Namespaces</h3><ul><li><a href="XIN.html">XIN</a><ul class='methods'><li data-type='method'><a href="XIN.html#.startApp">startApp</a></li><li data-type='method'><a href="XIN.html#.startApp">startApp</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#define">define</a></li><li><a href="global.html#emit">emit</a></li><li><a href="global.html#require">require</a></li><li><a href="global.html#subscribe">subscribe</a></li></ul>
 </nav>
 
 <div id="main">
@@ -47,7 +47,7 @@
 
 function xinModules() {
 
-    moduleCache = new Map();
+    var moduleCache = new Map();
 
     subscribe('xin-module').on('require', function(id) {
         require(id);
@@ -65,21 +65,30 @@ function xinModules() {
     /**
      *   Loads the specified module.
      *   @param  {string} id - ID of the module to load.
-     *   @fires  xin-module-loaded
      */
     function loadModule(id) {
-        let modulePath = XIN.basePath + '/' + id;
+        let modulePath = XIN.basePath + id + '.js';
+        console.debug(`Loading module with id: ${id}`);
         loadFile(modulePath, function(data) {
-            if (fs.existsSync(path)) {
-                code = new Function("define, require", data);
-            }
+
+            var code = new Function("define, require", data);
+
             var context = createCallContext(id);
-            code.call(context);
+            var callDefine = function(moduleId, dependencies, factory) {
+                if (factory === undefined) {
+                    factory = dependencies;
+                    dependencies = moduleId;
+                    moduleId = id;
+                }
+                define(moduleId, dependencies, factory);
+            };
+            code.call(this, callDefine, require);
         });
     }
 
     function createCallContext(moduleId) {
-        this.define = function(id, dependencies, factory) {
+        var ctx = new Object();
+        ctx.define = function(id, dependencies, factory) {
             if (factory === undefined) {
                 factory = dependencies;
                 dependencies = id;
@@ -87,41 +96,87 @@ function xinModules() {
             }
             define(id, dependencies, factory);
         };
-        this.require = require;
-        return this;
+        ctx.require = require;
+        return ctx;
     }
 
+    /**
+     *   Define a module with dependencies.
+     *   @param  {string}   [id]         - ID for this module
+     *   @param  {array}    dependencies - IDs of all dependencies that should
+     *   be loaded beforehand.
+     *   @param  {function} factory      - Function to call to create this
+     *   module will be passed all loaded dependencies.
+     *   @global
+     */
     function define(id, dependencies, factory) {
+        console.debug(`defining module [${id}] with dependencies ${dependencies}`);
         var module = createModuleStub(id, dependencies, factory);
         dependencies.forEach(dep => {
             subscribe('xin-module-loaded').consume(dep, function(loadedDep) {
-
+                module.loadedDependencies.set(dep, loadedDep);
+                checkModuleLoaded(module);
             });
             require(dep);
         });
-        emit('xin-module-loaded', id, module);
+        checkModuleLoaded(module);
+    }
+
+    function checkModuleLoaded(module) {
+        if (module.loadedDependencies.size === module.dependencies.length) {
+            var params = [];
+            module.dependencies.forEach(dep => {
+                params.push(module.loadedDependencies.get(dep));
+            });
+            var context = createCallContext(module.id);
+            module.module = module.factory.apply(context, params);
+            module.loaded = true;
+            emit('xin-module-loaded', module.id, module.module);
+        }
     }
 
     function createModuleStub(id, dependencies, factory) {
         var stub = {
             id: id,
             dependencies: dependencies,
-            factory,
-            factory,
+            factory: factory,
             loaded: false,
-            module: null
-        }
+            module: null,
+            loadedDependencies: new Map()
+        };
         moduleCache.set(id, stub);
         return stub;
     }
 
-    function require(id) {
+    /**
+     * Function which will be called with the required module after it is loaded.
+     * @callback requireCallback
+     * @param {any} module - The loaded module.
+     * @global
+     */
+
+     //TODO should also retunre a promise.
+     /**
+      *   Requires a modules and may call a callback.
+      *   @param  {string}   id                - ID of the module to load.
+      *   @param  {requireCallback} [callback] - Callback when module is loaded.
+      *   @global
+      */
+    function require(id, callback) {
+        console.debug(`requiring ${id} ${(callback) ? 'with Callback' : ''}`);
+        if (callback) {
+            subscribe('xin-module-loaded').consume(id, function(module) {
+                callback(module);
+            });
+        }
 
         //Check if module is already loaded.
         if (moduleCache.has(id)) {
             var module = moduleCache.get(id);
             if (module.finishedLoading) {
                 emit('xin-module-loaded', id, null, module.module);
+            } else {
+                loadModule(id);
             }
         } else {
             loadModule(id);
@@ -137,16 +192,32 @@ function xinModules() {
                 if (xhr.status === OK) {
                     callback(xhr.responseText); // 'This is the returned text.'
                 }
-            } else {
-                thorw({
-                    'Error': xhr.status
-                }); // An error occurred during the request.
             }
         }
 
         xhr.open('GET', path);
         xhr.send(null);
     }
+
+    /**
+     *   Starts an App using XIN and its module system.
+     *   @param  {array} dependencies - Dependencies needed for the app to run.
+     *   @param  {function} factory   - Function to execute once dependencies are loaded.
+     *   @method XIN.startApp
+     */
+    XIN.startApp = function(dependencies, factory) {
+        if (factory === undefined) {
+            require(dependencies)
+        } else {
+            define('XIN_MAIN_APP', dependencies, factory);
+        }
+    };
+
+    /**
+     *   Start an App from a single module.
+     *   @method XIN.startApp
+     *   @param  {string} mainFile - The main module for this App which should be started.
+     */
 
 }
 xinModules();
@@ -162,7 +233,7 @@ xinModules();
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Apr 26 2016 13:52:50 GMT+0800 (中国标准时间) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Apr 26 2016 15:42:52 GMT+0800 (中国标准时间) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
