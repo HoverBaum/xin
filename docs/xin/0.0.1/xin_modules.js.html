@@ -23,7 +23,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-modules.html">modules</a></li></ul><h3>Events</h3><ul><li><a href="module-modules.html#~event:xin-module-loaded">xin-module-loaded</a></li></ul><h3>Namespaces</h3><ul><li><a href="XIN.html">XIN</a><ul class='methods'><li data-type='method'><a href="XIN.html#.startApp">startApp</a></li><li data-type='method'><a href="XIN.html#.startApp">startApp</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#define">define</a></li><li><a href="global.html#emit">emit</a></li><li><a href="global.html#require">require</a></li><li><a href="global.html#subscribe">subscribe</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Events</h3><ul><li><a href="XIN.html#event:newChannel">newChannel</a></li><li><a href="XIN_modules.html#event:xin-module-loaded">xin-module-loaded</a></li></ul><h3>Namespaces</h3><ul><li><a href="XIN.html">XIN</a><ul class='methods'><li data-type='method'><a href="XIN.html#.startApp">startApp</a></li><li data-type='method'><a href="XIN.html#.startApp">startApp</a></li></ul></li><li><a href="XIN_modules.html">XIN/modules</a><ul class='methods'><li data-type='method'><a href="XIN_modules.html#~checkModuleLoaded">checkModuleLoaded</a></li><li data-type='method'><a href="XIN_modules.html#~createModuleStub">createModuleStub</a></li><li data-type='method'><a href="XIN_modules.html#~loadFile">loadFile</a></li><li data-type='method'><a href="XIN_modules.html#~loadModule">loadModule</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#define">define</a></li><li><a href="global.html#emit">emit</a></li><li><a href="global.html#require">require</a></li><li><a href="global.html#subscribe">subscribe</a></li></ul>
 </nav>
 
 <div id="main">
@@ -42,21 +42,18 @@
 /**
  *   Module to create modules
  *
- *   @module modules
+ *   @namespace
+ *   @alias XIN/modules
  */
-
 function xinModules() {
 
+    //Cache already loaded modules.
     var moduleCache = new Map();
-
-    subscribe('xin-module').on('require', function(id) {
-        require(id);
-    });
 
     /**
      * Module loaded event.
      *
-     * @event xin-module-loaded
+     * @event XIN/modules#xin-module-loaded
      * @param {string} id  - The id of the module loaded.
      * @param {?error} err - A possible error.
      * @param {any} module - The loaded module.
@@ -70,10 +67,7 @@ function xinModules() {
         let modulePath = XIN.basePath + id + '.js';
         console.debug(`Loading module with id: ${id}`);
         loadFile(modulePath, function(data) {
-
             var code = new Function("define, require", data);
-
-            var context = createCallContext(id);
             var callDefine = function(moduleId, dependencies, factory) {
                 if (factory === undefined) {
                     factory = dependencies;
@@ -86,20 +80,6 @@ function xinModules() {
         });
     }
 
-    function createCallContext(moduleId) {
-        var ctx = new Object();
-        ctx.define = function(id, dependencies, factory) {
-            if (factory === undefined) {
-                factory = dependencies;
-                dependencies = id;
-                id = moduleId;
-            }
-            define(id, dependencies, factory);
-        };
-        ctx.require = require;
-        return ctx;
-    }
-
     /**
      *   Define a module with dependencies.
      *   @param  {string}   [id]         - ID for this module
@@ -107,6 +87,7 @@ function xinModules() {
      *   be loaded beforehand.
      *   @param  {function} factory      - Function to call to create this
      *   module will be passed all loaded dependencies.
+     *   @listens XIN/modules#xin-module-loaded
      *   @global
      */
     function define(id, dependencies, factory) {
@@ -122,19 +103,41 @@ function xinModules() {
         checkModuleLoaded(module);
     }
 
+    /**
+     *   Checks wether all dependencies for a module are loaded yet.
+     *   @param  {XIN/modules#moduleStub} module - Stub for loading module.
+     *   @fires  XIN/modules#xin-module-loaded
+     */
     function checkModuleLoaded(module) {
         if (module.loadedDependencies.size === module.dependencies.length) {
             var params = [];
             module.dependencies.forEach(dep => {
                 params.push(module.loadedDependencies.get(dep));
             });
-            var context = createCallContext(module.id);
+            var context = {require: require};
             module.module = module.factory.apply(context, params);
             module.loaded = true;
             emit('xin-module-loaded', module.id, module.module);
         }
     }
 
+    /**
+     *   @typedef {object} XIN/modules#moduleStub
+     *   @property {string} id              - Id of the module being loaded.
+     *   @property {array} dependencies     - Dependencies required for this module.
+     *   @property {function} factory       - Factory function for this module.
+     *   @property {boolean} loaded=false   - Wether this module is finished loading yet.
+     *   @property {?any} module=null       - The loaded module.
+     *   @property {Map} loadedDependencies - All loaded dependencies.
+     */
+
+    /**
+     *   Creates an object representing a module getting loaded.
+     *   @param  {string} id          - ID of the object being loaded.
+     *   @param  {array} dependencies - IDs of dependencies.
+     *   @param  {function} factory   - Factory function for this module.
+     *   @return {XIN/modules#moduleStub}             - Representing a module being loading.
+     */
     function createModuleStub(id, dependencies, factory) {
         var stub = {
             id: id,
@@ -158,8 +161,10 @@ function xinModules() {
      //TODO should also retunre a promise.
      /**
       *   Requires a modules and may call a callback.
-      *   @param  {string}   id                - ID of the module to load.
-      *   @param  {requireCallback} [callback] - Callback when module is loaded.
+      *   @param   {string}   id                - ID of the module to load.
+      *   @param   {requireCallback} [callback] - Callback when module is loaded.
+      *   @fires   xin-module-loaded
+      *   @listens XIN/modules#xin-module-loaded
       *   @global
       */
     function require(id, callback) {
@@ -183,6 +188,11 @@ function xinModules() {
         }
     }
 
+    /**
+     *   Load a given file for a callback.
+     *   @param  {string}   path     To file that should be loaded.
+     *   @param  {Function} callback Function which takes the loaded files content.
+     */
     function loadFile(path, callback) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
@@ -233,7 +243,7 @@ xinModules();
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Apr 26 2016 15:42:52 GMT+0800 (中国标准时间) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Apr 26 2016 16:19:53 GMT+0800 (中国标准时间) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
