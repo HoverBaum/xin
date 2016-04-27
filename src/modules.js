@@ -146,7 +146,9 @@ function xinModules() {
      *   @private
      */
     function checkModuleLoaded(module) {
-        if (module.loadedDependencies.size === module.dependencies.length) {
+
+        //Make sure all dependencies and this isn't called multiple times by mistake.
+        if (module.loadedDependencies.size === module.dependencies.length && module.loaded === false) {
             let params = [];
             module.dependencies.forEach(dep => {
                 params.push(module.loadedDependencies.get(dep));
@@ -219,7 +221,7 @@ function xinModules() {
         //Check if module is already being loaded or even finished loading.
         if (moduleCache.has(id)) {
             let module = moduleCache.get(id);
-            if (module.finishedLoading) {
+            if (module.loaded) {
                 emit('xin-module-loaded', id, null, module.module);
             }
         } else {
