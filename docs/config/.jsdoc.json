@@ -4,7 +4,7 @@
         "dictionaries": ["jsdoc"]
     },
     "source": {
-        "include": ["lib", "package.json"],
+        "include": ["src/front", "package.json"],
         "includePattern": ".js$",
         "excludePattern": "(node_modules/|docs)"
     },
@@ -16,7 +16,7 @@
         "monospaceLinks": true
     },
     "opts": {
-        "destination": "./docs/",
+        "destination": "./docs/front",
         "encoding": "utf8",
         "recurse": true,
         "readme": "./docs/api-docs.md",
