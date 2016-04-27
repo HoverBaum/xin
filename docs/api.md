@@ -112,6 +112,7 @@ Starts an App using XIN and its module system.
 An alias for the global require.
 
 **Kind**: static method of <code>[XIN](#XIN)</code>  
+**See**: require  
 <a name="XIN.modules"></a>
 
 ### XIN.modules(config)

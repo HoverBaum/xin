@@ -269,6 +269,7 @@ function xinModules() {
 
     /**
      *   An alias for the global require.
+     *   @see require
      *   @method XIN.require
      */
     XIN.require = require;
