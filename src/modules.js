@@ -318,5 +318,15 @@ function xinModules() {
         });
     }
 
+    /**
+     *   Allows to manually register a module with XIN.
+     *   @param  {string} id     - ID for this module.
+     *   @param  {any} module    - What should be returned when this module is required.
+     *   @return {[type]}        [description]
+     */
+    XIN.registerModule(id, module) {
+        registerModule(id, module);
+    }
+
 }
 xinModules();
