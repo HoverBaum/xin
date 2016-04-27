@@ -129,7 +129,7 @@ function xinModules() {
         console.debug(`defining module [${id}] with dependencies ${dependencies}`);
         let module = createModuleStub(id, dependencies, factory);
         dependencies.forEach(dep => {
-            subscribe('xin-module-loaded').consume(dep, function(loadedDep) {
+            subscribe('xin-module-loaded').consume(dep, function(err, loadedDep) {
                 module.loadedDependencies.set(dep, loadedDep);
                 checkModuleLoaded(module);
             });
@@ -157,7 +157,7 @@ function xinModules() {
             let context = new Object();
             module.module = module.factory.apply(context, params);
             module.loaded = true;
-            registerModule(module.id, module.module);
+            registerModule(module.id, module);
         }
     }
 
@@ -213,7 +213,7 @@ function xinModules() {
     function require(id, callback) {
         console.debug(`requiring ${id} ${(callback) ? 'with Callback' : ''}`);
         if (callback) {
-            subscribe('xin-module-loaded').consume(id, function(module) {
+            subscribe('xin-module-loaded').consume(id, function(err, module) {
                 callback(module);
             });
         }
@@ -229,7 +229,7 @@ function xinModules() {
         }
 
         var prom = new Promise(function(resolve, reject) {
-            subscribe('xin-module-loaded').consume(id, function(module) {
+            subscribe('xin-module-loaded').consume(id, function(err, module) {
                 resolve(module);
             });
         });
@@ -322,7 +322,10 @@ function xinModules() {
 
             //Check if module was provided.
             if (shim.module) {
-                registerModule(shim.id, shim.module);
+                var stub = createModuleStub(shim.id, [], null);
+                stub.module = module;
+                stub.loaded = true;
+                registerModule(shim.id, stub);
             } else if (shim.source) {
                 shimmedModules.set(shim.id, shim);
             } else {
@@ -337,7 +340,10 @@ function xinModules() {
      *   @param  {any} module    - What should be returned when this module is required.
      */
     XIN.registerModule = function(id, module) {
-        registerModule(id, module);
+        var stub = createModuleStub(id, [], null);
+        stub.module = module;
+        stub.loaded = true;
+        registerModule(id, stub);
     }
 
 }
