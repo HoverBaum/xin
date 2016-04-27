@@ -1,3 +1,4 @@
+//NOTE currently on ice.
 define(["socket.io"], function setupUbiquitousFrontend(io) {
     var socket = io('/xin');
 

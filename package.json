@@ -5,8 +5,7 @@
   "main": "lib/xin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "jsdoc-front": "./node_modules/.bin/jsdoc --configure docs/config/.jsdoc-front.json --verbose",
-    "jsdoc-node": "./node_modules/.bin/jsdoc --configure docs/config/.jsdoc-node.json --verbose",
+    "jsdoc": "./node_modules/.bin/jsdoc --configure docs/config/.jsdoc.json --verbose",
     "serve-docs": "./node_modules/.bin/live-server ./docs/xin",
     "api-docs": "node_modules/.bin/jsdoc2md lib/xin.js > docs/api.md"
   },

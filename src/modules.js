@@ -203,29 +203,6 @@ function xinModules() {
     }
 
     /**
-     *   Load a given file for a callback.
-     *   @param  {string}   path     - To file that should be loaded.
-     *   @param  {Function} callback - Function which takes the loaded files content.
-     */
-    function loadFile(path, callback) {
-        let xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            var DONE = 4; // readyState 4 means the request is done.
-            var OK = 200; // status 200 is a successful return.
-            if (xhr.readyState === DONE) {
-                if (xhr.status === OK) {
-                    callback(xhr.responseText); // 'This is the returned text.'
-                } else {
-                    callback(null);
-                }
-            }
-        }
-
-        xhr.open('GET', path);
-        xhr.send(null);
-    }
-
-    /**
      *   Start an App from a single module.
      *   @method XIN.startApp
      *   @param  {string} mainModule  - The main module for this App which should be started.
@@ -240,7 +217,8 @@ function xinModules() {
         if (factory === undefined) {
             require([dependencies]);
         } else {
-            let code = new Function("define, require", `define([], ${factory})`);
+            let depString = `['${dependencies.join('\',\'').replace(/,$/, '')}']`;
+            let code = new Function("define, require", `define(${depString}, ${factory})`);
             let callDefine = function(moduleId, dependencies, factory) {
 
                 //We know there will be no ID given.
@@ -314,3 +292,27 @@ function xinModules() {
 
 }
 xinModules();
+
+/**
+ *   Load a given file for a callback.
+ *   @param  {string}   path     - To file that should be loaded.
+ *   @param  {Function} callback - Function which takes the loaded files content.
+ *   @method XIN/modules.loadFile
+ */
+function loadFile(path, callback) {
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        var DONE = 4; // readyState 4 means the request is done.
+        var OK = 200; // status 200 is a successful return.
+        if (xhr.readyState === DONE) {
+            if (xhr.status === OK) {
+                callback(xhr.responseText); // 'This is the returned text.'
+            } else {
+                callback(null);
+            }
+        }
+    }
+
+    xhr.open('GET', path);
+    xhr.send(null);
+}
