@@ -34,6 +34,7 @@ function xinModules() {
     /**
      * 	 Will decide how to load the specified module.
      *   @param  {string} id - ID of the module to load.
+     *   @private
      */
     function loadModule(id) {
         let modulePath = basePath + id + '.js';
@@ -53,6 +54,7 @@ function xinModules() {
      *   Registers a given module and fires an event for it.
      *   @param  {string} id     - ID for the module to be registered.
      *   @param  {any} module    - The module to register.
+     *   @private
      *   @fires  XIN/modules#xin-module-loaded
      */
     function registerModule(id, module) {
@@ -65,6 +67,7 @@ function xinModules() {
      *   Loads a module from a given path.
      *   @param  {string} path - Should be a URL at which the module can be found.
      *   @param  {string} id   - ID of the module to load.
+     *   @private
      */
     function loadModuleFromFile(path, id) {
         console.debug(`Loading file from ${path}`)
@@ -92,6 +95,7 @@ function xinModules() {
      *   @param  {string}   path     - To file that should be loaded.
      *   @param  {Function} callback - Function which takes the loaded files content.
      *   @method XIN/modules.loadFile
+     *   @private
      */
     function loadFile(path, callback) {
         let xhr = new XMLHttpRequest();
@@ -139,6 +143,7 @@ function xinModules() {
      *   Checks wether all dependencies for a module are loaded yet.
      *   @param  {XIN/modules#moduleStub} module - Stub for loading module.
      *   @fires  XIN/modules#xin-module-loaded
+     *   @private
      */
     function checkModuleLoaded(module) {
         if (module.loadedDependencies.size === module.dependencies.length) {
@@ -162,6 +167,7 @@ function xinModules() {
      *   @property {boolean} loaded=false   - Wether this module is finished loading yet.
      *   @property {?any} module=null       - The loaded module.
      *   @property {Map} loadedDependencies - All loaded dependencies.
+     *   @private
      */
 
     /**
@@ -170,6 +176,7 @@ function xinModules() {
      *   @param  {array} dependencies - IDs of dependencies.
      *   @param  {function} factory   - Factory function for this module.
      *   @return {XIN/modules#moduleStub}             - Representing a module being loading.
+     *   @private
      */
     function createModuleStub(id, dependencies, factory) {
         let stub = {
@@ -272,6 +279,7 @@ function xinModules() {
      *   @property {any} [module]     - A module to use.
      *   @property {string} [source]  - Source to load this module from (should be an absolute URL).
      *   @property {string} [exports] - Identifier exported by the module to use as module.
+     *   @private
      */
 
     /**
@@ -300,6 +308,8 @@ function xinModules() {
     /**
      *   Handle a shimmed module on config call.
      *   @param  {XIN/modules#shimArray} shims - Array of shimmed modules.
+     *   @method XIN.handleShims
+     *   @private
      */
     function handleShims(shims) {
         shims.forEach(shim => {
@@ -322,7 +332,6 @@ function xinModules() {
      *   Allows to manually register a module with XIN.
      *   @param  {string} id     - ID for this module.
      *   @param  {any} module    - What should be returned when this module is required.
-     *   @return {[type]}        [description]
      */
     XIN.registerModule = function(id, module) {
         registerModule(id, module);

@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "jsdoc": "./node_modules/.bin/jsdoc --configure docs/config/.jsdoc.json --verbose",
     "serve-docs": "./node_modules/.bin/live-server ./docs/xin",
-    "api-docs": "node_modules/.bin/jsdoc2md lib/xin.js > docs/api.md"
+    "api-docs": "node_modules/.bin/jsdoc2md \"src/**/*.js\" > docs/api.md"
   },
   "author": "",
   "license": "ISC",
