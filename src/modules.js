@@ -324,7 +324,7 @@ function xinModules() {
      *   @param  {any} module    - What should be returned when this module is required.
      *   @return {[type]}        [description]
      */
-    XIN.registerModule(id, module) {
+    XIN.registerModule = function(id, module) {
         registerModule(id, module);
     }
 
