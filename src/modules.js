@@ -10,6 +10,8 @@ function xinModules() {
     //TODO load module that expose a variable instead of using a define function.
     //TODO Feedback when modules are defined wrong or param is not specified should be better.
 
+    //NEXT Run tests, fix bugs, create more tests.
+
     //Cache already loaded modules.
     var moduleCache = new Map();
 
