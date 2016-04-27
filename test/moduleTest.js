@@ -1,5 +1,6 @@
 module.exports = function(t) {
-    t.timeoutAfter(5000)
+    t.timeoutAfter(5000);
+    t.plan(3);
     window.t = t;
 
     var app = {
@@ -10,7 +11,18 @@ module.exports = function(t) {
 
     XIN.startApp(['app'], function(app) {
         window.t.ok(app, 'Registered module is present');
-        window.t.end();
     });
+
+    testModuleLoading = function() {
+        XIN.modules({
+            basePath: 'http://127.0.0.1:3000/'
+        });
+        XIN.startApp(['assets/app'], function(app) {
+            window.t.ok(app, 'App got loaded');
+        });
+    }
+    testModuleLoading();
+
+    XIN.startApp('assets/testThere');
 
 }

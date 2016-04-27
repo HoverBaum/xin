@@ -59,8 +59,9 @@ function xinModules() {
      */
     function registerModule(id, module) {
         console.debug(`Loaded module [${id}]`);
+        module.loaded = true;
         moduleCache.set(id, module);
-        emit('xin-module-loaded', id, module);
+        emit('xin-module-loaded', id, null, module);
     }
 
     /**
@@ -126,7 +127,7 @@ function xinModules() {
      *   @global
      */
     function define(id, dependencies, factory) {
-        console.debug(`defining module [${id}] with dependencies ${dependencies}`);
+        console.debug(`defining module [${id}] with ${dependencies.length} dependencies ${dependencies}`);
         let module = createModuleStub(id, dependencies, factory);
         dependencies.forEach(dep => {
             subscribe('xin-module-loaded').consume(dep, function(err, loadedDep) {
@@ -155,8 +156,8 @@ function xinModules() {
             });
             //TODO get require in there.
             let context = new Object();
+            console.debug(`Module [${module.id}] loaded with ${params}`);
             module.module = module.factory.apply(context, params);
-            module.loaded = true;
             registerModule(module.id, module);
         }
     }
@@ -200,7 +201,6 @@ function xinModules() {
      * @global
      */
 
-    //TODO should also return a promise.
     /**
      *   Requires a modules and may call a callback.
      *   @param   {string}   id                - ID of the module to load.
@@ -255,7 +255,7 @@ function xinModules() {
             if(dependencies.length === 0) {
                 depString = '[]';
             }
-            let code = new Function("define, require", `define(${depString}, ${factory})`);
+            let code = new Function("define, require", `define(${depString}, ${factory});`);
             let callDefine = function(moduleId, dependencies, factory) {
 
                 //We know there will be no ID given.
@@ -324,7 +324,6 @@ function xinModules() {
             if (shim.module) {
                 var stub = createModuleStub(shim.id, [], null);
                 stub.module = module;
-                stub.loaded = true;
                 registerModule(shim.id, stub);
             } else if (shim.source) {
                 shimmedModules.set(shim.id, shim);
@@ -342,7 +341,6 @@ function xinModules() {
     XIN.registerModule = function(id, module) {
         var stub = createModuleStub(id, [], null);
         stub.module = module;
-        stub.loaded = true;
         registerModule(id, stub);
     }
 
