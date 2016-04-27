@@ -2,11 +2,14 @@ var xin = require('../src/xin.js');
 
 module.exports = function(test) {
     test('Basic event usage', function(t) {
-        t.plan(8);
+        t.plan(9);
 
+        //Check globals are here.
         t.ok(emit, 'Emit exists');
         t.ok(subscribe, 'Subscribe exists');
+        t.ok(XIN, 'XIN object exists')
 
+        //General subscription.
         var testMessages = 0;
         subscribe('test', function(msg) {
             testMessages +=1;
@@ -21,11 +24,12 @@ module.exports = function(test) {
         var deepMessages = 0;
         subscribe('test').on('deep', function(msg) {
             deepMessages += 1;
-            if(deepMessages >= 2) {
+            if(deepMessages === 1) {
                 t.equal(msg, 'deepMsg', 'Event message is received');
             }
         });
 
+        //Make sure consumers are only called once.
         var consumerCalls = 0;
         subscribe('test').consume('deep', function(msg) {
             consumerCalls += 1;
@@ -36,6 +40,7 @@ module.exports = function(test) {
         emit('test', 'deep', 'deepMsg');
         emit('test', 'deep', 'deepMsg');
 
+        //Make sure things are called as often as they should be.
         t.equal(consumerCalls, 1, 'Consumer only called once');
         t.equal(deepMessages, 2, 'But event called twice');
     });
