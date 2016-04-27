@@ -8,6 +8,7 @@
 function xinModules() {
     //TODO failing to load modules should be handled so that people can hook into it and app can continue running.
     //TODO load module that expose a variable instead of using a define function.
+    //TODO Feedback when modules are defined wrong or param is not specified should be better.
 
     //Cache already loaded modules.
     var moduleCache = new Map();
@@ -152,7 +153,7 @@ function xinModules() {
         if (module.loadedDependencies.size === module.dependencies.length && module.loaded === false) {
             let params = [];
             module.dependencies.forEach(dep => {
-                params.push(module.loadedDependencies.get(dep));
+                params.push(module.loadedDependencies.get(dep).module);
             });
             //TODO get require in there.
             let context = new Object();
