@@ -15,6 +15,8 @@ function setupXin() {
     const consumers = new Map();
 
     /**
+     *   An object used to chain subscriptions to events together.
+     *
      *   @typedef {object} subscribingChain
      *   @property {function} on - Subscribe to a special event on this channel.
      *   @property {function} consume - Subscribe to only the next occurance of an event.
@@ -22,6 +24,7 @@ function setupXin() {
 
     /**
      *   A new channel got created.
+     *   
      *   @event XIN#newChannel
      *   @param {string} name - The name of the new Channel.
      */
@@ -89,8 +92,8 @@ function setupXin() {
         if (consumers.get(channel).has(event)) {
             consumers.get(channel).get(event).forEach((listener, index) => {
                 listener(...eventArgs);
-                consumers.get(channel).get(event).slice(index, 1);
             });
+            consumers.get(channel).set(event, []);
         }
 
     };
@@ -141,6 +144,7 @@ function setupXin() {
 
     /**
      *   Creates an object for method chaining on subscriptions.
+     *
      *   @param  {string} channel The channel this chains on.
      *   @return {subscribingChain}
      *   @private

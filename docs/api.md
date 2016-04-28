@@ -33,7 +33,8 @@
 <dd><p>Function which will be called with the required module after it is loaded.</p>
 </dd>
 <dt><a href="#subscribingChain">subscribingChain</a> : <code>object</code></dt>
-<dd></dd>
+<dd><p>An object used to chain subscriptions to events together.</p>
+</dd>
 </dl>
 
 <a name="XIN/modules"></a>
@@ -69,6 +70,7 @@ XIN, the global Object to interact with XIN.
         * [.startApp(mainModule)](#XIN.startApp)
         * [.startApp(dependencies, factory)](#XIN.startApp)
         * [.require()](#XIN.require)
+        * [.define()](#XIN.define)
         * [.modules(config)](#XIN.modules)
         * [.registerModule(id, module)](#XIN.registerModule)
 
@@ -113,6 +115,13 @@ An alias for the global require.
 
 **Kind**: static method of <code>[XIN](#XIN)</code>  
 **See**: require  
+<a name="XIN.define"></a>
+
+### XIN.define()
+An alias for the global define.
+
+**Kind**: static method of <code>[XIN](#XIN)</code>  
+**See**: define  
 <a name="XIN.modules"></a>
 
 ### XIN.modules(config)
@@ -158,7 +167,7 @@ Requires a modules and may call a callback.
 
 **Kind**: global function  
 **Returns**: <code>Promise</code> - - A promise which will fire upon loading the module.  
-**Emits**: <code>event:xin-module-loaded</code>  
+**Emits**: <code>[xin-module-loaded](#XIN/modules+event_xin-module-loaded)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -206,6 +215,8 @@ Function which will be called with the required module after it is loaded.
 <a name="subscribingChain"></a>
 
 ## subscribingChain : <code>object</code>
+An object used to chain subscriptions to events together.
+
 **Kind**: global typedef  
 **Properties**
 

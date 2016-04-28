@@ -8,6 +8,7 @@
 function xinModules() {
     //TODO failing to load modules should be handled so that people can hook into it and app can continue running.
     //TODO load module that expose a variable instead of using a define function.
+    //TODO Feedback when modules are defined wrong or param is not specified should be better.
 
     //Cache already loaded modules.
     var moduleCache = new Map();
@@ -48,19 +49,6 @@ function xinModules() {
 
         //Load the module
         loadModuleFromFile(modulePath, id);
-    }
-
-    /**
-     *   Registers a given module and fires an event for it.
-     *   @param  {string} id     - ID for the module to be registered.
-     *   @param  {any} module    - The module to register.
-     *   @private
-     *   @fires  XIN/modules#xin-module-loaded
-     */
-    function registerModule(id, module) {
-        console.debug(`Loaded module [${id}]`);
-        moduleCache.set(id, module);
-        emit('xin-module-loaded', id, module);
     }
 
     /**
@@ -116,6 +104,20 @@ function xinModules() {
     }
 
     /**
+     *   Registers a given module and fires an event for it.
+     *   @param  {string} id                     - ID for the module to be registered.
+     *   @param  {XIN/modules#moduleStub} module - The module to register.
+     *   @private
+     *   @fires  XIN/modules#xin-module-loaded
+     */
+    function registerModule(id, module) {
+        console.debug(`Loaded module [${id}]`);
+        module.loaded = true;
+        moduleCache.set(id, module);
+        emit('xin-module-loaded', id, null, module.module);
+    }
+
+    /**
      *   Define a module with dependencies.
      *   @param  {string}   [id]         - ID for this module
      *   @param  {array}    dependencies - IDs of all dependencies that should
@@ -126,10 +128,10 @@ function xinModules() {
      *   @global
      */
     function define(id, dependencies, factory) {
-        console.debug(`defining module [${id}] with dependencies ${dependencies}`);
+        console.debug(`defining module [${id}] with ${dependencies.length} dependencies ${dependencies}`);
         let module = createModuleStub(id, dependencies, factory);
         dependencies.forEach(dep => {
-            subscribe('xin-module-loaded').consume(dep, function(loadedDep) {
+            subscribe('xin-module-loaded').consume(dep, function(err, loadedDep) {
                 module.loadedDependencies.set(dep, loadedDep);
                 checkModuleLoaded(module);
             });
@@ -142,24 +144,29 @@ function xinModules() {
     /**
      *   Checks wether all dependencies for a module are loaded yet.
      *   @param  {XIN/modules#moduleStub} module - Stub for loading module.
-     *   @fires  XIN/modules#xin-module-loaded
      *   @private
      */
     function checkModuleLoaded(module) {
-        if (module.loadedDependencies.size === module.dependencies.length) {
+
+        //Make sure all dependencies and this isn't called multiple times by mistake.
+        if (module.loadedDependencies.size === module.dependencies.length && module.loaded === false) {
+
+            //Create an array of things to hand to the factory as arguments.
             let params = [];
             module.dependencies.forEach(dep => {
                 params.push(module.loadedDependencies.get(dep));
             });
-            //TODO get require in there.
             let context = new Object();
+            console.debug(`Module [${module.id}] loaded`);
+
+            //This is where code from a modules gets run.
             module.module = module.factory.apply(context, params);
-            module.loaded = true;
-            registerModule(module.id, module.module);
+            registerModule(module.id, module);
         }
     }
 
     /**
+     *   A representation of a module currently being loaded.
      *   @typedef {object} XIN/modules#moduleStub
      *   @property {string} id              - Id of the module being loaded.
      *   @property {array} dependencies     - Dependencies required for this module.
@@ -198,20 +205,19 @@ function xinModules() {
      * @global
      */
 
-    //TODO should also return a promise.
     /**
      *   Requires a modules and may call a callback.
      *   @param   {string}   id                - ID of the module to load.
      *   @param   {requireCallback} [callback] - Callback when module is loaded.
      *   @return  {Promise}                    - A promise which will fire upon loading the module.
-     *   @fires   xin-module-loaded
+     *   @fires   XIN/modules#xin-module-loaded
      *   @listens XIN/modules#xin-module-loaded
      *   @global
      */
     function require(id, callback) {
         console.debug(`requiring ${id} ${(callback) ? 'with Callback' : ''}`);
         if (callback) {
-            subscribe('xin-module-loaded').consume(id, function(module) {
+            subscribe('xin-module-loaded').consume(id, function(err, module) {
                 callback(module);
             });
         }
@@ -219,7 +225,7 @@ function xinModules() {
         //Check if module is already being loaded or even finished loading.
         if (moduleCache.has(id)) {
             let module = moduleCache.get(id);
-            if (module.finishedLoading) {
+            if (module.loaded) {
                 emit('xin-module-loaded', id, null, module.module);
             }
         } else {
@@ -227,7 +233,7 @@ function xinModules() {
         }
 
         var prom = new Promise(function(resolve, reject) {
-            subscribe('xin-module-loaded').consume(id, function(module) {
+            subscribe('xin-module-loaded').consume(id, function(err, module) {
                 resolve(module);
             });
         });
@@ -253,7 +259,7 @@ function xinModules() {
             if(dependencies.length === 0) {
                 depString = '[]';
             }
-            let code = new Function("define, require", `define(${depString}, ${factory})`);
+            let code = new Function("define, require", `define(${depString}, ${factory});`);
             let callDefine = function(moduleId, dependencies, factory) {
 
                 //We know there will be no ID given.
@@ -275,6 +281,14 @@ function xinModules() {
     XIN.require = require;
 
     /**
+     *   An alias for the global define.
+     *   @see define
+     *   @method XIN.define
+     */
+    XIN.define = define;
+
+    /**
+     *   An array with informationa bout objects to shim.
      *   @typedef {object[]} XIN/modules#shimArray
      *   @property {string} id        - ID of the shimmed module.
      *   @property {any} [module]     - A module to use.
@@ -320,7 +334,9 @@ function xinModules() {
 
             //Check if module was provided.
             if (shim.module) {
-                registerModule(shim.id, shim.module);
+                var stub = createModuleStub(shim.id, [], null);
+                stub.module = module;
+                registerModule(shim.id, stub);
             } else if (shim.source) {
                 shimmedModules.set(shim.id, shim);
             } else {
@@ -335,7 +351,9 @@ function xinModules() {
      *   @param  {any} module    - What should be returned when this module is required.
      */
     XIN.registerModule = function(id, module) {
-        registerModule(id, module);
+        var stub = createModuleStub(id, [], null);
+        stub.module = module;
+        registerModule(id, stub);
     }
 
 }
