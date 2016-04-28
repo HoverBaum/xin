@@ -166,6 +166,7 @@ function xinModules() {
     }
 
     /**
+     *   A representation of a module currently being loaded.
      *   @typedef {object} XIN/modules#moduleStub
      *   @property {string} id              - Id of the module being loaded.
      *   @property {array} dependencies     - Dependencies required for this module.
@@ -279,9 +280,15 @@ function xinModules() {
      */
     XIN.require = require;
 
+    /**
+     *   An alias for the global define.
+     *   @see define
+     *   @method XIN.define
+     */
     XIN.define = define;
 
     /**
+     *   An array with informationa bout objects to shim.
      *   @typedef {object[]} XIN/modules#shimArray
      *   @property {string} id        - ID of the shimmed module.
      *   @property {any} [module]     - A module to use.

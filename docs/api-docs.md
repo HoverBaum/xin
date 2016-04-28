@@ -2,6 +2,9 @@
 
 Currently supporting events and handling modules.
 
+# API
+Generated using [jsdoc2md](https://github.com/jsdoc2md/jsdoc-to-markdown).
+
 ## Objects
 
 <dl>
@@ -37,7 +40,8 @@ Currently supporting events and handling modules.
 <dd><p>Function which will be called with the required module after it is loaded.</p>
 </dd>
 <dt><a href="#subscribingChain">subscribingChain</a> : <code>object</code></dt>
-<dd></dd>
+<dd><p>An object used to chain subscriptions to events together.</p>
+</dd>
 </dl>
 
 <a name="XIN/modules"></a>
@@ -73,6 +77,7 @@ XIN, the global Object to interact with XIN.
         * [.startApp(mainModule)](#XIN.startApp)
         * [.startApp(dependencies, factory)](#XIN.startApp)
         * [.require()](#XIN.require)
+        * [.define()](#XIN.define)
         * [.modules(config)](#XIN.modules)
         * [.registerModule(id, module)](#XIN.registerModule)
 
@@ -117,6 +122,13 @@ An alias for the global require.
 
 **Kind**: static method of <code>[XIN](#XIN)</code>  
 **See**: require  
+<a name="XIN.define"></a>
+
+### XIN.define()
+An alias for the global define.
+
+**Kind**: static method of <code>[XIN](#XIN)</code>  
+**See**: define  
 <a name="XIN.modules"></a>
 
 ### XIN.modules(config)
@@ -210,6 +222,8 @@ Function which will be called with the required module after it is loaded.
 <a name="subscribingChain"></a>
 
 ## subscribingChain : <code>object</code>
+An object used to chain subscriptions to events together.
+
 **Kind**: global typedef  
 **Properties**
 
