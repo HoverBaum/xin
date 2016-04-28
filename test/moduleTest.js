@@ -1,6 +1,6 @@
 module.exports = function(t) {
     t.timeoutAfter(5000);
-    t.plan(5);
+    t.plan(7);
     window.t = t;
 
     var app = {
@@ -18,12 +18,12 @@ module.exports = function(t) {
     XIN.require('app', function(app) {
         window.t.ok(app, 'Required registered module');
         window.t.ok(app.registeredApp, 'Required registered module, right module');
-    });/*
+    });
     XIN.require('assets/app', function(app) {
         window.t.ok(app, 'Required assets/app module');
         window.t.ok(app.assetsApp, 'Required assets/app module, right module');
     });
-*/
+
     XIN.define('TEST_DEFINE_MODULE', [], function() {
         window.t.pass('Able to define a module');
     });
