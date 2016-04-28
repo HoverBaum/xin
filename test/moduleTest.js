@@ -1,6 +1,6 @@
 module.exports = function(t) {
     t.timeoutAfter(5000);
-    t.plan(16);
+    t.plan(18);
     window.t = t;
 
     var app = {
@@ -58,4 +58,8 @@ module.exports = function(t) {
         window.t.equal(obj.number, 2, 'Including dependencies in a module works');
         window.t.equal(obj.three, 3, 'Including dependencies in a module interdependant possible');
     });
+
+    //Test nested require (the seemingly global one).
+    //window.t and window.t in this one
+    XIN.startApp('assets/nestedRequire');
 }

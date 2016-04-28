@@ -156,7 +156,6 @@ function xinModules() {
             module.dependencies.forEach(dep => {
                 params.push(module.loadedDependencies.get(dep));
             });
-            //TODO get require in there.
             let context = new Object();
             console.debug(`Module [${module.id}] loaded`);
 
