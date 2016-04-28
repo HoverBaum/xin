@@ -9,10 +9,10 @@ THIS IS IN ALPHA AND UNSTABLE BUT FEEL FREE TO FIND ISSUES.
 Features:
 - Events
 - modules
-
-Planned:
 - Databinding
 - Templating
+
+Planned:
 - Events for backend
 
 ## Usage

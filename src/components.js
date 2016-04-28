@@ -6,17 +6,28 @@
  */
 function setupComponents() {
 
+    //Cache all components already loaded.
     var componentCache = new Map();
+
+    /**
+     *   A Module with a property.
+     *   @typedef XIN/components#component
+     *   @type {object}
+     */
 
     /**
      *   A new component has been registered.
      *   @event XIN/components#xin-component-registered
+     *   @type {object}
      */
 
     XIN.component = function registerComponent(module, config) {
-        module.XIN_CONFIG = config;
+        let component = {
+            config: config,
+            module: module
+        }
         componentCache.set(config.name, module);
-        emit('xin-component-registered', module);
+        emit('xin-component-registered', component);
     }
 
     /**
@@ -25,7 +36,7 @@ function setupComponents() {
      *   @return {[type]}           [description]
      */
     function checkCurrentDOMForComponent(component) {
-        var config = component.XIN_CONFIG;
+        var config = component.config;
         var elements = document.querySelectorAll(config.name);
         XIN.forEach(elements, elm => {
             elm.innerHTML = config.templateString;
@@ -39,19 +50,20 @@ function setupComponents() {
      *   @return {[type]}           [description]
      */
     function loadTemplateForComponent(component) {
-        XIN.get(component.XIN_CONFIG.template).then(function(data) {
-            component.XIN_CONFIG.templateString = data;
+        XIN.get(component.config.template).then(function(data) {
+            component.config.templateString = data;
             emit('xin-component-loaded', component);
         });
     }
 
     function dataBindElement(elm, component) {
-        for (let key in component) {
+        console.log(component.module);
+        for (let key in component.module) {
 
             //Don't parse functions here.
-            if (typeof component[key] === 'function') return;
+            if (typeof component.module[key] === 'function') return;
 
-            addSettersAndGetters(component, key);
+            addSettersAndGetters(component.module, key, component.config.name);
             bindDataToDOM(elm, key, component);
             bindDOMtoData(elm, key, component);
         }
@@ -60,7 +72,7 @@ function setupComponents() {
     subscribe('xin-component-rendered', dataBindElement);
 
     function bindDataToDOM(elm, key, component) {
-        var name = component.XIN_CONFIG.name;
+        var name = component.config.name;
         var representations = findDomRepresentations(key, elm);
         subscribe('xin-component-changed').on(name, function(event) {
             updateRepresentations(event.newValue);
@@ -70,7 +82,7 @@ function setupComponents() {
                 elm.innerHTML = newValue;
             });
         }
-        updateRepresentations(component[key]);
+        updateRepresentations(component.module[key]);
     }
 
     function bindDOMtoData(elm, key, component) {
@@ -83,18 +95,18 @@ function setupComponents() {
             var isSource = valueRegEx.test(input.cloneNode(false).outerHTML);
             if(isSource) {
                 input.addEventListener('input', function(e) {
-                    component[key] = input.value;
+                    component.module[key] = input.value;
                 });
-                var name = component.XIN_CONFIG.name;
+                var name = component.config.name;
                 subscribe('xin-component-changed').on(name, function(event) {
                     input.value = event.newValue;
                 });
-                input.value = component[key];
+                input.value = component.module[key];
             }
         });
     }
 
-    function addSettersAndGetters(component, key) {
+    function addSettersAndGetters(component, key, componentName) {
 
         //Don't parse functions here.
         if (typeof component[key] === 'function') return;
@@ -106,7 +118,7 @@ function setupComponents() {
                 //To prevent loops make sure this is a new value.
                 if(newVal !== oldVal) {
                     value = newVal;
-                    emit('xin-component-changed', component.XIN_CONFIG.name, {
+                    emit('xin-component-changed', componentName, {
                         property: key,
                         oldValue: oldVal,
                         newValue: newVal
