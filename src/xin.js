@@ -89,8 +89,8 @@ function setupXin() {
         if (consumers.get(channel).has(event)) {
             consumers.get(channel).get(event).forEach((listener, index) => {
                 listener(...eventArgs);
-                consumers.get(channel).get(event).splice(index, 1);
             });
+            consumers.get(channel).set(event, []);
         }
 
     };

@@ -10,7 +10,7 @@ Features:
 - Events
 - modules
 
-PLanned:
+Planned:
 - Databinding
 - Templating
 - Events for backend
