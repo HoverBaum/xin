@@ -52,18 +52,45 @@ function setupComponents() {
             if (typeof component[key] === 'function') return;
 
             addSettersAndGetters(component, key);
-            bindDataToDOM(elm, key, component.XIN_CONFIG.name);
+            bindDataToDOM(elm, key, component);
+            bindDOMtoData(elm, key, component);
         }
 
     }
     subscribe('xin-component-rendered', dataBindElement);
 
-    function bindDataToDOM(elm, key, name) {
+    function bindDataToDOM(elm, key, component) {
+        var name = component.XIN_CONFIG.name;
         var representations = findDomRepresentations(key, elm);
         subscribe('xin-component-changed').on(name, function(event) {
+            updateRepresentations(event.newValue);
+        });
+        function updateRepresentations(newValue) {
             representations.forEach(elm => {
-                elm.innerHTML = event.newValue;
+                elm.innerHTML = newValue;
             });
+        }
+        updateRepresentations(component[key]);
+    }
+
+    function bindDOMtoData(elm, key, component) {
+        var valueRegEx = /<.*\[value\]=".+".*>/;
+        var inputs = elm.querySelectorAll('input');
+        XIN.forEach(inputs, input => {
+
+            //Create a string representation of the DOM node and test it.
+            //http://stackoverflow.com/questions/24541477/how-to-get-string-representation-of-html-element
+            var isSource = valueRegEx.test(input.cloneNode(false).outerHTML);
+            if(isSource) {
+                input.addEventListener('input', function(e) {
+                    component[key] = input.value;
+                });
+                var name = component.XIN_CONFIG.name;
+                subscribe('xin-component-changed').on(name, function(event) {
+                    input.value = event.newValue;
+                });
+                input.value = component[key];
+            }
         });
     }
 
@@ -75,12 +102,16 @@ function setupComponents() {
         Object.defineProperty(component, key, {
             set: function(newVal) {
                 let oldVal = value;
-                value = newVal;
-                emit('xin-component-changed', component.XIN_CONFIG.name, {
-                    property: key,
-                    oldValue: oldVal,
-                    newValue: newVal
-                });
+
+                //To prevent loops make sure this is a new value.
+                if(newVal !== oldVal) {
+                    value = newVal;
+                    emit('xin-component-changed', component.XIN_CONFIG.name, {
+                        property: key,
+                        oldValue: oldVal,
+                        newValue: newVal
+                    });
+                }
             },
             get: function() {
                 return value;
