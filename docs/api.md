@@ -158,7 +158,7 @@ Requires a modules and may call a callback.
 
 **Kind**: global function  
 **Returns**: <code>Promise</code> - - A promise which will fire upon loading the module.  
-**Emits**: <code>event:xin-module-loaded</code>  
+**Emits**: <code>[xin-module-loaded](#XIN/modules+event_xin-module-loaded)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
