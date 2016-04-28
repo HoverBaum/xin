@@ -2,6 +2,8 @@
 
 Currently supporting events and handling modules.
 
+Our philosophy is that all will change, XIN will one day be no more and when that time comes your app should still work. So the two things we assume immutable are events and modules and nothing more.
+
 # API
 Generated using [jsdoc2md](https://github.com/jsdoc2md/jsdoc-to-markdown).
 
