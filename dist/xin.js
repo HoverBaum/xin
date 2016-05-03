@@ -602,6 +602,13 @@ function setupComponents() {
      */
 
     /**
+     *   A component has been rendered into a container.
+     *   @event CIN/components#xin-component-rendered
+     *   @param {DOMElement} element                 - The parent the component got rendered into.
+     *   @param {XIN/components#component} component - The rendered component.
+     */
+
+    /**
      *   A component has been changed.
      *   @event XIN/components#xin-component-changed
      *   @param {string} name  - Name of the changed component.
@@ -624,7 +631,7 @@ function setupComponents() {
             config: config,
             module: module
         }
-        componentCache.set(config.name, module);
+        componentCache.set(config.name, component);
         emit('xin-component-registered', component);
     }
 
@@ -632,6 +639,7 @@ function setupComponents() {
      *   Checks if the component should be rendered intot he current DOM.
      *   @param  {XIN/components#component} component - Component to handle.
      *   @private
+     *   @fires CIN/components#xin-component-rendered
      */
     function checkCurrentDOMForComponent(component) {
         var config = component.config;
@@ -643,9 +651,30 @@ function setupComponents() {
     }
 
     /**
+     *   Will check an elemnt of the DOM for registered modules.
+     *   @param {DOMElement} elm                     - The elemnt of the DOM to check.
+     *   @param {XIN/components#component} component - The rendered component.
+     *   @private
+     *   @fires CIN/components#xin-component-rendered
+     */
+    function checkElementForComponents(elm, parentComponent) {
+        componentCache.forEach(component => {
+            let clonedComponent = Object.assign({}, component);
+            let name = component.config.name;
+            let elements = elm.querySelectorAll(name);
+            clonedComponent.parent = parentComponent;
+            XIN.forEach(elements, element => {
+                element.innerHTML = component.templateString;
+                emit('xin-component-rendered', element, clonedComponent);
+            });
+        });
+    }
+
+    /**
      *   Loades the template for a given component.
      *   @param  {XIN/components#component} component - Component to handle.
      *   @private
+     *   @fires XIN/components#xin-component-loaded
      */
     function loadTemplateForComponent(component) {
         XIN.get(component.config.template).then(function(data) {
@@ -661,7 +690,6 @@ function setupComponents() {
      *   @private
      */
     function dataBindElement(elm, component) {
-        console.log(component.module);
         for (let key in component.module) {
 
             //Don't parse functions here.
@@ -672,6 +700,10 @@ function setupComponents() {
             bindDOMtoData(elm, key, component);
         }
 
+        //Also do this for parents.
+        if(component.parent) {
+            dataBindElement(elm, component.parent);
+        }
     }
 
     /**
@@ -730,6 +762,7 @@ function setupComponents() {
      *   @param {string} key           - Property of the components module to bind.
      *   @param {string} componentName - Name of the component Currently handled.
      *   @private
+     *   @fires XIN/components#xin-component-changed
      */
     function addSettersAndGetters(module, key, componentName) {
         let value = module[key];
@@ -780,6 +813,7 @@ function setupComponents() {
     subscribe('xin-component-loaded', checkCurrentDOMForComponent);
     subscribe('xin-component-registered', loadTemplateForComponent);
     subscribe('xin-component-rendered', dataBindElement);
+    subscribe('xin-component-rendered', checkElementForComponents);
 
 }
 setupComponents();

@@ -12,9 +12,6 @@ Features:
 - Databinding
 - Templating
 
-Planned:
-- Events for backend
-
 ## Usage
 
 XIN provides two global functions as well as a global 'XIN' object.
