@@ -12,4 +12,10 @@ XIN.component(component, {
 ```
 
 That is the most basic way to define a component. Simply add a module and some information, the most basic of which are the components name and its template.
-The name should contain a "-".
+The name should contain a "-". This is not a must but will ensure compatibility with other frameworks. The idea is that native tags will never contain a "-" and so this is a good convention to omit overwriting things.
+
+## Databinding
+
+Basic databinding is supported. You can use mustache Syntax with `{{property}}` to bind representations in your html. Apart from the the only other thing you can currently bind to are inputs with `[value]="property"`.
+
+You have access to all property of the module a template is bound to and properties of all parents in the DOM with children properties taking priority.

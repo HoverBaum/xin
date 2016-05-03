@@ -63,3 +63,8 @@ require('some/module', function(mod) {
 
 });
 ```
+
+## More Features
+
+For convenience XIN also provides some more features which are optional but currently deployed with XIN. Check out their docs:
+- [components](docs/components.md)
