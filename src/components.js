@@ -76,6 +76,7 @@ function setupComponents() {
      *   Checks if the component should be rendered intot he current DOM.
      *   @param  {XIN/components#component} component - Component to handle.
      *   @private
+     *   @fires CIN/components#xin-component-rendered
      */
     function checkCurrentDOMForComponent(component) {
         var config = component.config;
@@ -90,6 +91,8 @@ function setupComponents() {
      *   Will check an elemnt of the DOM for registered modules.
      *   @param {DOMElement} elm                     - The elemnt of the DOM to check.
      *   @param {XIN/components#component} component - The rendered component.
+     *   @private
+     *   @fires CIN/components#xin-component-rendered
      */
     function checkElementForComponents(elm, parentComponent) {
         componentCache.forEach(component => {
@@ -108,6 +111,7 @@ function setupComponents() {
      *   Loades the template for a given component.
      *   @param  {XIN/components#component} component - Component to handle.
      *   @private
+     *   @fires XIN/components#xin-component-loaded
      */
     function loadTemplateForComponent(component) {
         XIN.get(component.config.template).then(function(data) {
@@ -195,6 +199,7 @@ function setupComponents() {
      *   @param {string} key           - Property of the components module to bind.
      *   @param {string} componentName - Name of the component Currently handled.
      *   @private
+     *   @fires XIN/components#xin-component-changed
      */
     function addSettersAndGetters(module, key, componentName) {
         let value = module[key];
