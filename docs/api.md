@@ -1,6 +1,20 @@
+# Xin
+
+Currently supporting events and handling modules.
+
+Our philosophy is that all will change, XIN will one day be no more and when that time comes your app should still work. So the two things we assume immutable are events and modules and nothing more.
+
+Below you can find the public API and through the navigation at the side the entire documentation of all events and private functions.
+
+# API
+Generated using [jsdoc2md](https://github.com/jsdoc2md/jsdoc-to-markdown).
+
 ## Objects
 
 <dl>
+<dt><a href="#XIN/components">XIN/components</a> : <code>object</code></dt>
+<dd><p>Databinding for XIN.</p>
+</dd>
 <dt><a href="#XIN/modules">XIN/modules</a> : <code>object</code></dt>
 <dd><p>Module to create modules</p>
 </dd>
@@ -37,6 +51,97 @@
 </dd>
 </dl>
 
+<a name="XIN/components"></a>
+
+## XIN/components : <code>object</code>
+Databinding for XIN.
+
+**Kind**: global namespace  
+
+* [XIN/components](#XIN/components) : <code>object</code>
+    * _instance_
+        * ["xin-component-registered" (component)](#XIN/components+event_xin-component-registered)
+        * ["xin-component-loaded" (component)](#XIN/components+event_xin-component-loaded)
+        * ["xin-component-changed" (name, event)](#XIN/components+event_xin-component-changed)
+        * [.component](#XIN/components+component) : <code>object</code>
+        * [.config](#XIN/components+config) : <code>object</code>
+    * _inner_
+        * [~checkElementForComponents(elm, component)](#XIN/components..checkElementForComponents)
+
+<a name="XIN/components+event_xin-component-registered"></a>
+
+### "xin-component-registered" (component)
+A new component has been registered.
+
+**Kind**: event emitted by <code>[XIN/components](#XIN/components)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| component | <code>[component](#XIN/components+component)</code> | The registered component. |
+
+<a name="XIN/components+event_xin-component-loaded"></a>
+
+### "xin-component-loaded" (component)
+A component has been loaded (referring to its template).
+
+**Kind**: event emitted by <code>[XIN/components](#XIN/components)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| component | <code>[component](#XIN/components+component)</code> | The loaded component. |
+
+<a name="XIN/components+event_xin-component-changed"></a>
+
+### "xin-component-changed" (name, event)
+A component has been changed.
+
+**Kind**: event emitted by <code>[XIN/components](#XIN/components)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | Name of the changed component. |
+| event | <code>object</code> | The change event. |
+| event.property | <code>string</code> | The cahnged property. |
+| event.oldValue | <code>any</code> | The former value. |
+| event.newValue | <code>any</code> | The value now. |
+| event.name | <code>string</code> | Name of the changed component. |
+
+<a name="XIN/components+component"></a>
+
+### xiN/components.component : <code>object</code>
+Component with config and module.
+
+**Kind**: instance typedef of <code>[XIN/components](#XIN/components)</code>  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| config | <code>[config](#XIN/components+config)</code> | Configuration object. |
+| module | <code>any</code> | The module for this component. |
+
+<a name="XIN/components+config"></a>
+
+### xiN/components.config : <code>object</code>
+**Kind**: instance typedef of <code>[XIN/components](#XIN/components)</code>  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | Name for this component. |
+| template | <code>string</code> | Path to template file. |
+
+<a name="XIN/components..checkElementForComponents"></a>
+
+### XIN/components~checkElementForComponents(elm, component)
+Will check an elemnt of the DOM for registered modules.
+
+**Kind**: inner method of <code>[XIN/components](#XIN/components)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| elm | <code>DOMElement</code> | The elemnt of the DOM to check. |
+| component | <code>[component](#XIN/components+component)</code> | The rendered component. |
+
 <a name="XIN/modules"></a>
 
 ## XIN/modules : <code>object</code>
@@ -67,6 +172,8 @@ XIN, the global Object to interact with XIN.
     * _instance_
         * ["newChannel" (name)](#XIN+event_newChannel)
     * _static_
+        * [.component(module, config)](#XIN.component)
+        * [.forEach()](#XIN.forEach)
         * [.startApp(mainModule)](#XIN.startApp)
         * [.startApp(dependencies, factory)](#XIN.startApp)
         * [.require()](#XIN.require)
@@ -85,6 +192,25 @@ A new channel got created.
 | --- | --- | --- |
 | name | <code>string</code> | The name of the new Channel. |
 
+<a name="XIN.component"></a>
+
+### XIN.component(module, config)
+Register a module as a component with some config.
+
+**Kind**: static method of <code>[XIN](#XIN)</code>  
+**Emits**: <code>[xin-component-registered](#XIN/components+event_xin-component-registered)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| module | <code>any</code> | The module to use for this component. |
+| config | <code>[config](#XIN/components+config)</code> | Config for this component. |
+
+<a name="XIN.forEach"></a>
+
+### XIN.forEach()
+Helper for XIN.
+
+**Kind**: static method of <code>[XIN](#XIN)</code>  
 <a name="XIN.startApp"></a>
 
 ### XIN.startApp(mainModule)
