@@ -20,7 +20,7 @@
         "encoding": "utf8",
         "recurse": true,
         "private": true,
-        "readme": "./docs/api-docs.md",
+        "readme": "./docs/api.md",
         "template": "./node_modules/docdash"
     }
 }

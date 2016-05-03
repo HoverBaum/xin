@@ -7,7 +7,8 @@
     "test": "node ./node_modules/browserify/bin/cmd.js test/test.js | node ./node_modules/tape-run/bin/run.js | tap-spec",
     "jsdoc": "./node_modules/.bin/jsdoc --configure docs/config/.jsdoc.json --verbose",
     "serve-docs": "./node_modules/.bin/live-server ./docs/xin",
-    "api-docs": "node_modules/.bin/jsdoc2md \"src/**/*.js\" > docs/api.md"
+    "api-docs": "node_modules/.bin/jsdoc2md \"src/**/*.js\" --template docs/api-docs.md > docs/api.md",
+    "docs": "npm run api-docs && npm run jsdoc"
   },
   "author": "",
   "license": "ISC",
